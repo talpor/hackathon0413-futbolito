@@ -4,5 +4,5 @@
 
 Installation and start::
 
-    $> pip install requirements.pip
+    $> pip install -r requirements.pip
     $> python server.py
