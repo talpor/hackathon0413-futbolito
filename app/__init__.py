@@ -107,12 +107,14 @@ def update_game(game_id):
     return jsonify({'success': True})
 
 @app.route('/games/types', methods=['GET'])
-def list_game_types():
+def game_type_list():
     return jsonify(GAME_TYPES)
 
 @app.route('/nexts', methods=['GET'])
 def next_list():
-    return jsonify(Next.all())
+    return jsonify({
+        'results': [next.text for next in Next.query.all()]
+    })
 
 @app.route('/nexts', methods=['POST'])
 def add_next():
@@ -125,6 +127,44 @@ def delete_next(next_id):
     db.session.commit()
     return jsonify({'success': True})
 
+@app.route('/players', methods=['GET'])
+def player_list():
+    return jsonify({
+        'results': [player_to_dict(player) for player in Player.query.all()]
+    })
+
+@app.route('/games', methods=['GET'])
+def game_list():
+    return jsonify({
+        'results': [
+            {
+                'id': game.id,
+                'type': game.type,
+                'created': game.created,
+                'ended': game.ended,
+                'barca1': player_to_dict(game.barca1),
+                'barca2': player_to_dict(game.barca2),
+                'madrid1': player_to_dict(game.madrid1),
+                'madrid2': player_to_dict(game.madrid2),
+                'score_board': game.score_board
+            }
+            for game in Game.query.order_by(Game.created)
+        ]
+    })
+
 #
 # RaspberryPi API
 # -----------------------------------------------------------------------------
+
+
+#
+# Helpers
+# -----------------------------------------------------------------------------
+def player_to_dict(player):
+    """Returns an easy json represtation of a `Player`'s instance."""
+    return {
+        'id': player.id,
+        'name': player.name,
+        'email': player.email,
+        'twitter': player.twitter
+    }
