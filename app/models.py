@@ -27,6 +27,7 @@ class Player(db.Model):
 
 class Game(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    type    = db.Column(db.Integer)
     created = db.Column(db.DateTime)
     ended   = db.Column(db.DateTime)
     paused  = db.Column(db.Boolean, default=False)
