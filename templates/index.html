@@ -3,6 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 
     <title>Futbolito</title>
 
@@ -10,10 +13,18 @@
     <meta name="author" content="" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- <link type="text/css" rel="stylesheet" media="all" href="static/css/grid.css" /> -->
-    <!-- <link type="text/css" rel="stylesheet" media="all" href="static/css/screen.css" /> -->
+    <link rel="stylesheet" href="https://s3.amazonaws.com/codiqa-cdn/mobile/1.2.0/jquery.mobile-1.2.0.min.css" />
+    <link type="text/css" rel="stylesheet" media="all" href="static/css/screen.css" />
+    
   </head>
   <body>
-    INDEX
+    {% include "home.html" %}
+    {% include "config-game.html" %}
+    {% include "game.html" %}
+    {% include "next-list.html" %}
+    <script src="/static/js/libs/jquery/jquery-1.9.1.js"></script>
+    <script src="/static/js/libs/jquery.mobile/jquery.mobile-1.3.1.js"></script>
+    <script src="/static/js/libs/lodash/lodash.js"></script>
+    <script src="/static/js/libs/backbone/backbone.js"></script>
   </body>
 </html>

@@ -1,0 +1,92 @@
+.ui-block {
+    border-bottom: solid 1px #333;
+    border-right: solid 1px #333;
+    min-height: 100px;
+}
+
+.ui-block-top {
+    border-top: solid 1px #333;
+}
+
+.ui-block-a {
+    border-left: solid 1px #333;
+}
+
+
+.swap {
+	z-index: 1;
+	position: absolute;
+	height: 6%;
+	cursor: pointer;
+	background-color: #dedede;
+}
+
+.swap-a {
+	top: 42%;
+	left: 10%;
+}
+
+.swap-b {
+	top: 42%;
+	right: 10%;
+}
+
+#camp-nou {
+	position: absolute;
+	top: 70px;
+	bottom: 90px;
+	left: 23%;
+	right: 23%;
+	background-color: green;
+}
+
+#camp-nou .side {
+	height: 50%;
+}
+
+#camp-nou .side p {
+	margin: 0;
+	text-align: center;
+	font-size: 7em;
+}
+
+#camp-nou .side:nth-child(1) p {
+	padding-top: 20%;
+}
+
+#camp-nou .side:nth-child(2) p {
+	position: absolute;
+	width: 100%;
+	bottom: 0px;
+	padding-bottom: 20%;
+}
+
+.player {
+	z-index: 1;
+	position: absolute;
+	width: 15%;
+}
+
+.player img {
+	width: 100%;
+}
+
+.player-1 {
+	top: 50px;
+	left: 5%;
+}
+
+.player-2 {
+	top:  50px;
+	right: 5%;
+}
+
+.player-3 {
+	bottom: 70px;
+	left: 5%;
+}
+
+.player-4 {
+	bottom: 70px;
+	right: 5%;
+}
