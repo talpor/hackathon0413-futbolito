@@ -2,7 +2,10 @@ from __future__ import absolute_import
 
 from datetime import datetime
 
-from . import db
+from flask.ext.sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
+
 
 class Player(db.Model):
     id = db.Column(db.Integer, primary_key=True)
