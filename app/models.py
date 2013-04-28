@@ -56,6 +56,33 @@ class Game(db.Model):
     def __repr__(self):
         return '<Game %s: %s>' % (self.id, self.created)
 
+    def swype(self, team):
+        """Swypes position on both members of the given `team`. Team should be
+        'barca' or 'madrid', otherwise an exception will be raised. After
+        swyping, an broadcast notification will be sent to all the clients.
+        """
+        if team not in ['barca', 'madrid']:
+            raise ValueError('Invalid team: %s' % team)
+        member1 = getattr(self, '%s1' % team)
+        member2 = getattr(self, '%s2' % team)
+        member1.position = 'forward' if member1.position == 'defense' \
+                                     else 'defense'
+        member2.position = 'forward' if member2.position == 'defense' \
+                                     else 'defense'
+        db.session.add(member1)
+        db.session.add(member2)
+        db.session.commit()
+        # notify.
+
+    def terminate(self):
+        """Ends the game and notifies via broadcasts all the clients that a new
+        game has to start.
+        """
+        if self.ended:
+            return
+        self.ended = datetime.utcnow()
+        # notify.
+
     def toggle_pause(self):
         self.paused = not self.paused
 
