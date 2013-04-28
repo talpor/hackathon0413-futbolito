@@ -92,7 +92,7 @@ def create_game():
     db.session.commit()
     return jsonify({'success': True, 'id': game.id})
 
-@app.routes('/games/<int:game_id>', methods=['PUT'])
+@app.route('/games/<int:game_id>', methods=['PUT'])
 def update_game(game_id):
     game = Game.query.filter(id=game_id).first_or_404()
     if game.ended is not None:
@@ -106,20 +106,20 @@ def update_game(game_id):
         game.swype(team=request.json['swype'])
     return jsonify({'success': True})
 
-@app.routes('/games/types', methods=['GET'])
+@app.route('/games/types', methods=['GET'])
 def list_game_types():
     return jsonify(GAME_TYPES)
 
-@app.routes('/nexts', methods=['GET'])
+@app.route('/nexts', methods=['GET'])
 def next_list():
     return jsonify(Next.all())
 
-@app.routes('/nexts', methods=['POST'])
+@app.route('/nexts', methods=['POST'])
 def add_next():
     db.session.add(Next(text=request.json['next']))
     return jsonify({'success': True})
 
-@app.routes('/nexts/<int:next_id>', methods=['DELETE'])
+@app.route('/nexts/<int:next_id>', methods=['DELETE'])
 def delete_next(next_id):
     db.session.delete(Next.query.filter(id=next_id).first_or_404())
     db.session.commit()
