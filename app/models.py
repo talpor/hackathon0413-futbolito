@@ -83,3 +83,11 @@ class Goal(db.Model):
 
     def __repr__(self):
         return '<Goal %s -> %s (%s)>' % (self.player, self.game, self.time)
+
+
+class Next(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.String(150), nullable=False)
+
+    def __repr__(self):
+        return self.text
