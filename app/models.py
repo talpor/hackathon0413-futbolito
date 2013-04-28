@@ -15,10 +15,6 @@ class Player(db.Model):
     position = db.Column(db.String(20), unique=False)
 
     # relationships
-    barca1  = db.relationship('Game', backref='barca1', lazy='dynamic')
-    barca2  = db.relationship('Game', backref='barca2', lazy='dynamic')
-    madrid1 = db.relationship('Game', backref='madrid1', lazy='dynamic')
-    madrid2 = db.relationship('Game', backref='madrid2', lazy='dynamic')
     goal    = db.relationship('Goal', backref='player', lazy='dynamic')
 
     def __init__(self, name=None, position=''):
@@ -31,6 +27,7 @@ class Player(db.Model):
 
 class Game(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    type    = db.Column(db.Integer)
     created = db.Column(db.DateTime)
     ended   = db.Column(db.DateTime)
     paused  = db.Column(db.Boolean, default=False)
@@ -42,14 +39,49 @@ class Game(db.Model):
     madrid2_id = db.Column(db.Integer, db.ForeignKey('player.id'))
 
     # relationships
-    game = db.relationship('Goal', backref='game', lazy='dynamic')
+    goals   = db.relationship('Goal', backref='game', lazy='dynamic')
+    barca1  = db.relationship('Player', backref='barca1_games',
+                              foreign_keys=[barca1_id])
+    barca2  = db.relationship('Player', backref='barca2_games',
+                              foreign_keys=[barca2_id])
+    madrid1 = db.relationship('Player', backref='madrid1_games',
+                              foreign_keys=[madrid1_id])
+    madrid2 = db.relationship('Player', backref='madrid2_games',
+                              foreign_keys=[madrid2_id])
 
-
-    def __init__(self, created=None):
+    def __init__(self, created=None, *args, **kwargs):
+        super(Game,self).__init__(*args, **kwargs)
         self.created = created or datetime.utcnow()
 
     def __repr__(self):
         return '<Game %s: %s>' % (self.id, self.created)
+
+    def swype(self, team):
+        """Swypes position on both members of the given `team`. Team should be
+        'barca' or 'madrid', otherwise an exception will be raised. After
+        swyping, an broadcast notification will be sent to all the clients.
+        """
+        if team not in ['barca', 'madrid']:
+            raise ValueError('Invalid team: %s' % team)
+        member1 = getattr(self, '%s1' % team)
+        member2 = getattr(self, '%s2' % team)
+        member1.position = 'forward' if member1.position == 'defense' \
+                                     else 'defense'
+        member2.position = 'forward' if member2.position == 'defense' \
+                                     else 'defense'
+        db.session.add(member1)
+        db.session.add(member2)
+        db.session.commit()
+        # notify.
+
+    def terminate(self):
+        """Ends the game and notifies via broadcasts all the clients that a new
+        game has to start.
+        """
+        if self.ended:
+            return
+        self.ended = datetime.utcnow()
+        # notify.
 
     def toggle_pause(self):
         self.paused = not self.paused
@@ -71,10 +103,18 @@ class Goal(db.Model):
         self.player = player
         self.game   = game
         self.time   = datetime.utcnow() - self.game.created
-        self.barca1_position  = game.barca1
-        self.barca2_position  = game.barca1
-        self.madrid1_position = game.madrid1
-        self.madrid2_position = game.madrid2
+        self.barca1_position  = game.barca1.position
+        self.barca2_position  = game.barca1.position
+        self.madrid1_position = game.madrid1.position
+        self.madrid2_position = game.madrid2.position
 
     def __repr__(self):
         return '<Goal %s -> %s (%s)>' % (self.player, self.game, self.time)
+
+
+class Next(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.String(150), nullable=False)
+
+    def __repr__(self):
+        return self.text
