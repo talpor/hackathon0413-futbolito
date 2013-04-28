@@ -56,6 +56,19 @@ class Game(db.Model):
     def __repr__(self):
         return '<Game %s: %s>' % (self.id, self.created)
 
+    @property
+    def score_board(self):
+        """Returns the score board with the following format::
+            {
+                'barca': <int>,
+                'madrid': <int>,
+            }
+        """
+        return {
+            'barca': 0,
+            'madrid': 0
+        }
+
     def swype(self, team):
         """Swypes position on both members of the given `team`. Team should be
         'barca' or 'madrid', otherwise an exception will be raised. After
