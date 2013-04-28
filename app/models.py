@@ -38,7 +38,7 @@ class Game(db.Model):
     madrid2_id = db.Column(db.Integer, db.ForeignKey('player.id'))
 
     # relationships
-    game    = db.relationship('Goal', backref='game', lazy='dynamic')
+    goals   = db.relationship('Goal', backref='game', lazy='dynamic')
     barca1  = db.relationship('Player', backref='barca1_games',
                               foreign_keys=[barca1_id])
     barca2  = db.relationship('Player', backref='barca2_games',
@@ -48,8 +48,8 @@ class Game(db.Model):
     madrid2 = db.relationship('Player', backref='madrid2_games',
                               foreign_keys=[madrid2_id])
 
-
-    def __init__(self, created=None):
+    def __init__(self, created=None, *args, **kwargs):
+        super(Game,self).__init__(*args, **kwargs)
         self.created = created or datetime.utcnow()
 
     def __repr__(self):
@@ -75,10 +75,10 @@ class Goal(db.Model):
         self.player = player
         self.game   = game
         self.time   = datetime.utcnow() - self.game.created
-        self.barca1_position  = game.barca1
-        self.barca2_position  = game.barca1
-        self.madrid1_position = game.madrid1
-        self.madrid2_position = game.madrid2
+        self.barca1_position  = game.barca1.position
+        self.barca2_position  = game.barca1.position
+        self.madrid1_position = game.madrid1.position
+        self.madrid2_position = game.madrid2.position
 
     def __repr__(self):
         return '<Goal %s -> %s (%s)>' % (self.player, self.game, self.time)

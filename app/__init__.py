@@ -22,8 +22,6 @@ app = Flask(__name__,
             template_folder=os.path.join(root_dir, 'templates'))
 app.config.from_object(__name__)
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
-
-db.app = app
 db.init_app(app)
 
 
@@ -40,5 +38,5 @@ def home(room_id=None):
 
 
 #
-# RaspberryPy API
+# RaspberryPi API
 # -----------------------------------------------------------------------------
