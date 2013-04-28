@@ -15,10 +15,6 @@ class Player(db.Model):
     position = db.Column(db.String(20), unique=False)
 
     # relationships
-    barca1  = db.relationship('Game', backref='barca1', lazy='dynamic')
-    barca2  = db.relationship('Game', backref='barca2', lazy='dynamic')
-    madrid1 = db.relationship('Game', backref='madrid1', lazy='dynamic')
-    madrid2 = db.relationship('Game', backref='madrid2', lazy='dynamic')
     goal    = db.relationship('Goal', backref='player', lazy='dynamic')
 
     def __init__(self, name=None, position=''):
@@ -42,7 +38,15 @@ class Game(db.Model):
     madrid2_id = db.Column(db.Integer, db.ForeignKey('player.id'))
 
     # relationships
-    game = db.relationship('Goal', backref='game', lazy='dynamic')
+    game    = db.relationship('Goal', backref='game', lazy='dynamic')
+    barca1  = db.relationship('Player', backref='barca1_games',
+                              foreign_keys=[barca1_id])
+    barca2  = db.relationship('Player', backref='barca2_games',
+                              foreign_keys=[barca2_id])
+    madrid1 = db.relationship('Player', backref='madrid1_games',
+                              foreign_keys=[madrid1_id])
+    madrid2 = db.relationship('Player', backref='madrid2_games',
+                              foreign_keys=[madrid2_id])
 
 
     def __init__(self, created=None):
