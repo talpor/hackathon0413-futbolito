@@ -2,9 +2,9 @@ from __future__ import absolute_import
 
 import os
 
-from flask import Flask, render_template
+from flask import Flask, jsonify, render_template, request
 
-from app.models import db
+from app.models import db, Game, Next, Player
 
 #
 # configuration
@@ -35,7 +35,95 @@ def home(room_id=None):
 #
 # browser API
 # -----------------------------------------------------------------------------
+GAME_TYPES = (
+    (0, 'Simple'),
+    (1, 'Intercambiado')
+)
 
+@app.route('/games', methods=['POST'])
+def create_game():
+    """Creates a new game. Checks that there's no game currently active.
+
+    Expects a request with the following format::
+        {
+            'type': <integer>,
+            'teams': {
+                'barca':  {
+                    'defense': <integer: player id>,
+                    'forward': <integer: player id>
+                },
+                'madrid': {
+                    'defense': <integer: player id>,
+                    'forward': <integer: player id>
+                }
+            }
+        }
+    """
+    if Game.query.filter(ended=None).first() is not None:
+        # there's a game in place
+        return jsonify({
+            'success': False,
+            'reason': 'Currently there\'s an active game'
+        })
+    if not request.json['type']:
+        return 'no game type', 400
+    if request.json['type'] not in [gt[0] for gt in GAME_TYPES]:
+        return 'invalid game type', 400
+    # teams
+    barca  = [request.json['teams']['barca']['defense'],
+              request.json['teams']['barca']['forward']]
+    madrid = [request.json['teams']['madrid']['defense'],
+              request.json['teams']['madrid']['forward']]
+
+    barca_defense = Player.query.get(id=barca[0])
+    barca_forward = Player.query.get(id=barca[1])
+    madrid_defense = Player.query.get(id=madrid[0])
+    madrid_forward = Player.query.get(id=madrid[1])
+
+    if barca_defense is None and barca_forward is None:
+        return 'Barca team malformed', 400
+    if madrid_defense is None and madrid_forward is None:
+        return 'Madrid team malformed', 400
+
+    game = Game(type=request.json['type'],
+                barca1=barca_defense, barca2=barca_forward,
+                madrid1=madrid_defense, madrid2=madrid_forward)
+    db.session.add(game)
+    db.session.commit()
+    return jsonify({'success': True, 'id': game.id})
+
+@app.routes('/games/<int:game_id>', methods=['PUT'])
+def update_game(game_id):
+    game = Game.query.filter(id=game_id).first_or_404()
+    if game.ended is not None:
+        return {'success': False, 'reason': 'Game already terminated.'}
+    if request.json.get('pause'):
+        game.toggle_pause()
+    if request.json.get('cancel'):
+        game.terminate()
+    if request.json.get('swype') and \
+       request.json['swype'] in ['barca', 'madrid']:
+        game.swype(team=request.json['swype'])
+    return jsonify({'success': True})
+
+@app.routes('/games/types', methods=['GET'])
+def list_game_types():
+    return jsonify(GAME_TYPES)
+
+@app.routes('/nexts', methods=['GET'])
+def next_list():
+    return jsonify(Next.all())
+
+@app.routes('/nexts', methods=['POST'])
+def add_next():
+    db.session.add(Next(text=request.json['next']))
+    return jsonify({'success': True})
+
+@app.routes('/nexts/<int:next_id>', methods=['DELETE'])
+def delete_next(next_id):
+    db.session.delete(Next.query.filter(id=next_id).first_or_404())
+    db.session.commit()
+    return jsonify({'success': True})
 
 #
 # RaspberryPi API
