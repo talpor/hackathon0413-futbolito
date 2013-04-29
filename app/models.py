@@ -19,10 +19,6 @@ class Player(db.Model):
     # relationships
     goal    = db.relationship('Goal', backref='player', lazy='dynamic')
 
-    def __init__(self, name=None, position=''):
-        self.name = name
-        self.position = position
-
     def __repr__(self):
         return '<Player %r>' % (self.name)
 
