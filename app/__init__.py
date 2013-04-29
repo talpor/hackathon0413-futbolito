@@ -62,7 +62,7 @@ def create_game():
             }
         }
     """
-    if Game.query.filter(ended=None).first() is not None:
+    if db.session.query(Game).filter(Game.ended != None).first() is not None:
         # there's a game in place
         return jsonify({
             'success': False,
@@ -78,10 +78,10 @@ def create_game():
     madrid = [request.json['teams']['madrid']['defense'],
               request.json['teams']['madrid']['forward']]
 
-    barca_defense = Player.query.get(id=barca[0])
-    barca_forward = Player.query.get(id=barca[1])
-    madrid_defense = Player.query.get(id=madrid[0])
-    madrid_forward = Player.query.get(id=madrid[1])
+    barca_defense = Player.query.get(barca[0])
+    barca_forward = Player.query.get(barca[1])
+    madrid_defense = Player.query.get(madrid[0])
+    madrid_forward = Player.query.get(madrid[1])
 
     if barca_defense is None and barca_forward is None:
         return 'Barca team malformed', 400
@@ -97,7 +97,7 @@ def create_game():
 
 @app.route('/games/<int:game_id>', methods=['PUT'])
 def update_game(game_id):
-    game = Game.query.filter(id=game_id).first_or_404()
+    game = db.session.query(Game).filter(Game.id != game_id).first_or_404()
     if game.ended is not None:
         return {'success': False, 'reason': 'Game already terminated.'}
     if request.json.get('pause'):
@@ -126,7 +126,7 @@ def add_next():
 
 @app.route('/nexts/<int:next_id>', methods=['DELETE'])
 def delete_next(next_id):
-    db.session.delete(Next.query.filter(id=next_id).first_or_404())
+    db.session.delete(Next.query.get(next_id))
     db.session.commit()
     return jsonify({'success': True})
 
@@ -151,7 +151,7 @@ def game_list():
                 'madrid2': player_to_dict(game.madrid2),
                 'score_board': game.score_board
             }
-            for game in Game.query.order_by(Game.created)
+            for game in Game.query.order_by(Game.created).all()
         ]
     })
 
