@@ -25,7 +25,7 @@ var APP = {
             APP.__game_config__.type = $(this).data().id;
         });
 
-        
+
         window.io.on('goal', function(data) {
             console.log(data);
         });
@@ -60,6 +60,7 @@ var APP = {
             contentType: 'application/json; charset=utf-8',  // working with application/x-www-form-urlencoded; is awful.
             dataType: 'json',
             success: function() {
+                APP.chronometer.start();
                 console.log('A new game started!');
             },
             error: function(e) {
@@ -74,30 +75,64 @@ var APP = {
             'data-action': 'removePlayer',
             'data-name': player.data().name
         });
+        var gameAvatar = $('<img>').attr({
+            'src': player.attr('src'),
+            'data-name': player.data().name
+        });
         var target = $('.team-banner .empty').eq(0);
         var pos = target.hasClass('barca') ? 0 : 2;
         pos = target.hasClass('defense') ? pos + 1 : pos + 2;
         switch (pos) {
             case 1:
-              APP.__game_config__.teams.barca.defense = player.data().id;
-              break;
+                APP.__game_config__.teams.barca.defense = player.data().id;
+                $('#game .player-3').html(gameAvatar);
+                break;
             case 2:
-              APP.__game_config__.teams.barca.forward = player.data().id;
-              break;
+                APP.__game_config__.teams.barca.forward = player.data().id;
+                $('#game .player-1').html(gameAvatar);
+                break;
             case 3:
-              APP.__game_config__.teams.madrid.defense = player.data().id;
-              break;
+                APP.__game_config__.teams.madrid.defense = player.data().id;
+                $('#game .player-2').html(gameAvatar);
+                break;
             case 4:
-              APP.__game_config__.teams.madrid.forward = player.data().id;
-              break;
+                APP.__game_config__.teams.madrid.forward = player.data().id;
+                $('#game .player-4').html(gameAvatar);
+                break;
         }
         target.html(gravatar);
         target.removeClass('empty');
     },
     removePlayer: function(picture) {
-        console.log(picture);
         picture.parent().addClass('empty');
         picture.remove();
+    },
+    chronometer: {
+        __chronometer__: undefined,
+        __currentTime__: 0,
+        target: $('#game h3'),
+        update: function() {
+            this.__currentTime__+=1;
+            var currentTime = this.__currentTime__/60;
+            var mm = Math.floor(currentTime);
+            this.target.html(
+                ("0" + mm).slice(-2) + ':' +
+                ("0" + Math.floor((currentTime - mm) * 60)).slice(-2)
+            );
+
+        },
+        start: function (){
+           this.update();
+           this.__chronometer__ = setInterval('APP.chronometer.update();', 1000);
+        },
+        pause: function() {
+            clearInterval(this.__chronometer__);
+        },
+        stop: function  (){
+            this.__currentTime__ = 0;
+            clearInterval(this.__chronometer__);
+            this.target.html('--:--');
+        }
     }
 };
 
