@@ -8,6 +8,6 @@ if __name__ == '__main__':
     if app.debug:
         from werkzeug.debug import DebuggedApplication
         app.wsgi_app = DebuggedApplication(app.wsgi_app, True)
-    #from socketio.server import SocketIOServer
-    #SocketIOServer(('0.0.0.0', port), app, policy_server=False).serve_forever()
-    app.run(host='0.0.0.0', port=port)
+    from socketio.server import SocketIOServer
+    SocketIOServer(('0.0.0.0', port), app, policy_server=False).serve_forever()
+    # app.run(host='0.0.0.0', port=port)

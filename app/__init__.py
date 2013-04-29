@@ -12,7 +12,7 @@ from .models import db, Game, Next, Player
 # configuration
 # -----------------------------------------------------------------------------
 
-DEBUG = True
+DEBUG = False
 DATABASE_URL = 'postgresql://futbolito:ttaallppoorr@/futbolito'
 SECRET_KEY = 'A0Zr98j/3yXsdr R~XHXFG!jmN]ASSR/,?RT'
 SEND_FILE_MAX_AGE_DEFAULT = 0
@@ -169,7 +169,7 @@ from socketio import socketio_manage
 @app.route('/socket.io/<path:path>')
 def socket_io(path):
     namespaces = {
-        '/io': IONamespace,
+        '/board': IONamespace,
     }
     try:
         socketio_manage(request.environ, namespaces, request)
