@@ -5,6 +5,7 @@ import os
 from flask import Flask, Response, jsonify, render_template, request
 
 from app.models import db, Game, Next, Player
+from app.io import IONamespace
 
 #
 # configuration
@@ -165,7 +166,7 @@ from socketio import socketio_manage
 @app.route('/socket.io/<path:path>')
 def socket_io(path):
     namespaces = {
-        #'/battle': TetrisBattleNamespace,
+        '/io': IONamespace,
     }
     try:
         socketio_manage(request.environ, namespaces, request)
