@@ -14,6 +14,7 @@ from app.io import IONamespace
 DEBUG = True
 DATABASE_URL = 'postgresql://futbolito:ttaallppoorr@/futbolito'
 SECRET_KEY = 'A0Zr98j/3yXsdr R~XHXFG!jmN]ASSR/,?RT'
+SEND_FILE_MAX_AGE_DEFAULT = 0
 SQLALCHEMY_DATABASE_URI = DATABASE_URL
 
 root_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
