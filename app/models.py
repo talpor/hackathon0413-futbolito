@@ -115,6 +115,7 @@ class Game(db.Model):
 class Goal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     time = db.Column(db.DateTime)  # seconds after game started
+    team = db.Column(db.String(6))
     player_id = db.Column(db.Integer, db.ForeignKey('player.id'))
     game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
 
@@ -124,9 +125,14 @@ class Goal(db.Model):
     madrid1_position = db.Column(db.String(20), unique=False)
     madrid2_position = db.Column(db.String(20), unique=False)
 
-    def __init__(self, player, game):
+    def __init__(self, player, game, team):
+        if team not in ['barca', 'madrid']:
+            raise ValueError(
+                'Attempting to add a goal to something weird: %s' % team
+            )
         self.player = player
         self.game   = game
+        self.team   = team
         self.time   = datetime.utcnow() - self.game.created
         self.barca1_position  = game.barca1.position
         self.barca2_position  = game.barca1.position
