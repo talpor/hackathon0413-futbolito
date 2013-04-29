@@ -1,17 +1,15 @@
-.ui-block {
-    border-bottom: solid 1px #333;
-    border-right: solid 1px #333;
-    min-height: 100px;
+#players-table div {
+	text-align: center;
 }
 
-.ui-block-top {
-    border-top: solid 1px #333;
+#players-table div img {
+	width: 100%;
+	cursor: pointer;
 }
 
-.ui-block-a {
-    border-left: solid 1px #333;
+.team-banner .ui-block {
+    text-align: center;
 }
-
 
 .swap {
 	z-index: 1;
