@@ -25,15 +25,6 @@ var APP = {
             APP.__game_config__.type = $(this).data().id;
         });
 
-
-        window.io.on('goal', function(data) {
-            console.log(data);
-        });
-
-        window.io.on('undo', function(data) {
-            console.log(data);
-        });
-
         $(document).on('click', '#game .player', function() {
             console.log('GOOOOOLLLL!!');
             window.io.emit('goal', {'team':'barca', 'position':'defender'});
@@ -59,14 +50,32 @@ var APP = {
             data: JSON.stringify(APP.__game_config__),
             contentType: 'application/json; charset=utf-8',  // working with application/x-www-form-urlencoded; is awful.
             dataType: 'json',
-            success: function() {
+            success: function(data) {
                 APP.chronometer.start();
-                console.log('A new game started!');
+                if (data.success)
+                    console.log('A new game started!');
+                else
+                    console.log('A game is already in place');
+                APP.ioConnect();
             },
             error: function(e) {
                 console.error('sorry :(');
                 console.error(e);
             }
+        });
+    },
+    ioConnect: function () {
+        window.io = io.connect('/board');
+
+        // debug io events
+        window.io.on('log', function (pkt) { console.info('Receiving from server:', pkt); });
+
+        window.io.on('goal', function(data) {
+            console.log(data);
+        });
+
+        window.io.on('undo', function(data) {
+            console.log(data);
         });
     },
     selectPlayer: function(player) {
@@ -136,5 +145,4 @@ var APP = {
     }
 };
 
-window.io = io.connect('/io');
 $(document).ready(APP.init);
