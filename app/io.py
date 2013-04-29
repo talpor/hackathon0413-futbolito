@@ -5,7 +5,7 @@ from datetime import datetime
 
 from socketio.namespace import BaseNamespace
 
-from .models import Game, db
+from .models import Game, Goal, db
 
 
 class PubSubMixin(object):
@@ -80,12 +80,31 @@ class IONamespace(BaseNamespace, PubSubMixin):
                                  time=datetime.utcnow() - game.created,
                                  teams=game.teams, score=game.score_board)
 
-    def on_goal(self, action, player):
+    def on_goal(self, team, position, own=False):
         """Updates the board according to the given action."""
         game = db.session.query(Game).filter(Game.ended != None).first()
         if game is None:
             return
         # update stuff
+        player1 = getattr(game, '%s1' % team)
+        player2 = getattr(game, '%s2' % team)
+        scorer = player1 if player1.position == position else player2
+        team   = team if not own \
+                      else [t for t in ['barca', 'madrid'] if t != team][0]
+        goal   = Goal(scorer, game, team)
+        db.session.add(goal)
+        db.commit()
+        # update boards
         self.publish_to_room('game board',
-                             time=datetime.utcnow() - game.created,
+                             teams=game.teams, score=game.score_board)
+
+    def on_undo(self):
+        game = db.session.query(Game).filter(Game.ended != None).first()
+        if game is None:
+            return
+        # update stuff
+        db.session.delete(game.goals.query.order_by(Goal.time).first())
+        db.session.commit()
+        # update boards
+        self.publish_to_room('game board',
                              teams=game.teams, score=game.score_board)
