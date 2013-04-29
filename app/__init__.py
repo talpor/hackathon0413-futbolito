@@ -161,7 +161,6 @@ def game_list():
 #
 # SocketIO
 # -----------------------------------------------------------------------------
-from gevent import monkey; monkey.patch_all()
 from socketio import socketio_manage
 
 @app.route('/socket.io/<path:path>')
