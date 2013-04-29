@@ -2,9 +2,10 @@ from __future__ import absolute_import
 
 import os
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, Response, jsonify, render_template, request
 
 from app.models import db, Game, Next, Player
+from app.io import IONamespace
 
 #
 # configuration
@@ -13,6 +14,7 @@ from app.models import db, Game, Next, Player
 DEBUG = True
 DATABASE_URL = 'postgresql://futbolito:ttaallppoorr@/futbolito'
 SECRET_KEY = 'A0Zr98j/3yXsdr R~XHXFG!jmN]ASSR/,?RT'
+SEND_FILE_MAX_AGE_DEFAULT = 0
 SQLALCHEMY_DATABASE_URI = DATABASE_URL
 
 root_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
@@ -155,6 +157,23 @@ def game_list():
 #
 # RaspberryPi API
 # -----------------------------------------------------------------------------
+
+#
+# SocketIO
+# -----------------------------------------------------------------------------
+from socketio import socketio_manage
+
+@app.route('/socket.io/<path:path>')
+def socket_io(path):
+    namespaces = {
+        '/io': IONamespace,
+    }
+    try:
+        socketio_manage(request.environ, namespaces, request)
+    except:
+        app.logger.error("Exception while handling socketio connection",
+                         exc_info=True)
+    return Response()
 
 
 #
