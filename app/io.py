@@ -56,19 +56,20 @@ class IONamespace(BaseNamespace, PubSubMixin):
         if msg.has_key('event_name'):
             self.emit(msg['event_name'], msg['args'])
 
-    def publish_to_room(self, event_name, **args):
+    def publish_to_room(self, event_name, **kwargs):
         """Handles the redis connection to publish a message to our room
         channel.
         """
         pkt = json.dumps({
             'event_name': event_name,
-            'args': args
+            'args': kwargs
         })
         r = redis.StrictRedis()
         r.publish('futbolito', pkt)
 
     #
-    # event listeners
+    # Event Listeners
+    # -------------------------------------------------------------------------
     def on_subscribe(self):
         """Announces every other player in the room (if any) that a new user
         has arrived.
@@ -80,6 +81,8 @@ class IONamespace(BaseNamespace, PubSubMixin):
                                  time=datetime.utcnow() - game.created,
                                  teams=game.teams, score=game.score_board)
 
+    # From raspberrypi buttons
+    # ------------------------
     def on_goal(self, team, position, own=False):
         """Updates the board according to the given action."""
         game = db.session.query(Game).filter(Game.ended != None).first()
@@ -112,20 +115,22 @@ class IONamespace(BaseNamespace, PubSubMixin):
         self.publish_to_room('game board',
                              teams=game.teams, score=game.score_board)
 
+    # From browser's interface
+    # ------------------------
     def on_add_next(self, text):
         next = Next(text=text)
         db.session.add(Next(text=text))
         db.session.commit()
         self.publish_to_room('next list',
-                             [{'id': next.id, 'text': next.text} \
-                              for next in Next.query.all()])
+                             results=[{'id': next.id, 'text': next.text} \
+                                      for next in Next.query.all()])
 
     def on_delete_next(self, id):
         db.session.delete(Next.query.get(id))
         db.session.commit()
         self.publish_to_room('next list',
-                             [{'id': next.id, 'text': next.text} \
-                              for next in Next.query.all()])
+                             results=[{'id': next.id, 'text': next.text} \
+                                      for next in Next.query.all()])
 
     def on_swype(self, team):
         game = db.session.query(Game).filter(Game.ended != None).first()
