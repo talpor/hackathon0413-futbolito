@@ -54,6 +54,7 @@ var APP = {
     },
     createGame: function() {
         $.post(API.createGame, APP.__game_config__, function() {
+            APP.chronometer.start();
             console.log('A new game started!');
         }).error(function(e) {
             console.error('sorry :(');
@@ -97,6 +98,33 @@ var APP = {
     removePlayer: function(picture) {
         picture.parent().addClass('empty');
         picture.remove();
+    },
+    chronometer: {
+        __chronometer__: undefined,
+        __currentTime__: 0,
+        target: $('#game h3'),
+        update: function() {
+            this.__currentTime__+=1;
+            var currentTime = this.__currentTime__/60;
+            var mm = Math.floor(currentTime);
+            this.target.html(
+                ("0" + mm).slice(-2) + ':' +
+                ("0" + Math.floor((currentTime - mm) * 60)).slice(-2)
+            );
+
+        },
+        start: function (){
+           this.update();
+           this.__chronometer__ = setInterval('APP.chronometer.update();', 1000); 
+        },
+        pause: function() {
+            clearInterval(this.__chronometer__);
+        },
+        stop: function  (){
+            this.__currentTime__ = 0;
+            clearInterval(this.__chronometer__);
+            this.target.html('--:--');
+        }
     }
 };
 
