@@ -1,8 +1,11 @@
 from __future__ import absolute_import
 
 import json, redis
+from datetime import datetime
 
 from socketio.namespace import BaseNamespace
+
+from .models import Game, db
 
 
 class PubSubMixin(object):
@@ -66,9 +69,23 @@ class IONamespace(BaseNamespace, PubSubMixin):
 
     #
     # event listeners
-    def on_subscribe(self, username, room_id):
+    def on_subscribe(self):
         """Announces every other player in the room (if any) that a new user
         has arrived.
         """
-        super(IONamespace, self).on_subscribe(username, room_id)
-        self.publish_to_room('opponent changed', name=username)
+        super(IONamespace, self).on_subscribe()
+        game = db.session.query(Game).filter(Game.ended != None).first()
+        if game is not None:
+            self.publish_to_room('game board',
+                                 time=datetime.utcnow() - game.created,
+                                 teams=game.teams, score=game.score_board)
+
+    def on_goal(self, action, player):
+        """Updates the board according to the given action."""
+        game = db.session.query(Game).filter(Game.ended != None).first()
+        if game is None:
+            return
+        # update stuff
+        self.publish_to_room('game board',
+                             time=datetime.utcnow() - game.created,
+                             teams=game.teams, score=game.score_board)
