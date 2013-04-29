@@ -62,7 +62,7 @@ def create_game():
             }
         }
     """
-    if db.session.query(Game).filter(Game.ended != None).first() is not None:
+    if db.session.query(Game).filter(Game.ended == None).first() is not None:
         # there's a game in place
         return jsonify({
             'success': False,
