@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import os
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, Response, jsonify, render_template, request
 
 from app.models import db, Game, Next, Player
 
@@ -155,6 +155,24 @@ def game_list():
 #
 # RaspberryPi API
 # -----------------------------------------------------------------------------
+
+#
+# SocketIO
+# -----------------------------------------------------------------------------
+from gevent import monkey; monkey.patch_all()
+from socketio import socketio_manage
+
+@app.route('/socket.io/<path:path>')
+def socket_io(path):
+    namespaces = {
+        #'/battle': TetrisBattleNamespace,
+    }
+    try:
+        socketio_manage(request.environ, namespaces, request)
+    except:
+        app.logger.error("Exception while handling socketio connection",
+                         exc_info=True)
+    return Response()
 
 
 #
