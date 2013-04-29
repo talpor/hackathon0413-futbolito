@@ -4,8 +4,9 @@ import os
 
 from flask import Flask, Response, jsonify, render_template, request
 
-from app.models import db, Game, Next, Player
-from app.io import IONamespace
+from .helpers import player_to_dict
+from .io import IONamespace
+from .models import db, Game, Next, Player
 
 #
 # configuration
@@ -174,16 +175,3 @@ def socket_io(path):
         app.logger.error("Exception while handling socketio connection",
                          exc_info=True)
     return Response()
-
-
-#
-# Helpers
-# -----------------------------------------------------------------------------
-def player_to_dict(player):
-    """Returns an easy json represtation of a `Player`'s instance."""
-    return {
-        'id': player.id,
-        'name': player.name,
-        'email': player.email,
-        'twitter': player.twitter
-    }
