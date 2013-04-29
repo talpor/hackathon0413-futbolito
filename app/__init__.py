@@ -116,12 +116,14 @@ def game_type_list():
 @app.route('/nexts', methods=['GET'])
 def next_list():
     return jsonify({
-        'results': [next.text for next in Next.query.all()]
+        'results': [{'id': next.id, 'text': next.text} \
+                    for next in Next.query.all()]
     })
 
 @app.route('/nexts', methods=['POST'])
 def add_next():
     db.session.add(Next(text=request.json['next']))
+    db.session.commit()
     return jsonify({'success': True})
 
 @app.route('/nexts/<int:next_id>', methods=['DELETE'])

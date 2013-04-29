@@ -5,7 +5,7 @@ from datetime import datetime
 
 from socketio.namespace import BaseNamespace
 
-from .models import Game, Goal, db
+from .models import Game, Goal, Next, db
 
 
 class PubSubMixin(object):
@@ -85,6 +85,9 @@ class IONamespace(BaseNamespace, PubSubMixin):
         game = db.session.query(Game).filter(Game.ended != None).first()
         if game is None:
             return
+        # check if they're terminating the game
+        if game.score_board['barca'] == 5 or game.score_board['madrid'] == 5:
+            game.terminate()
         # update stuff
         player1 = getattr(game, '%s1' % team)
         player2 = getattr(game, '%s2' % team)
@@ -108,3 +111,39 @@ class IONamespace(BaseNamespace, PubSubMixin):
         # update boards
         self.publish_to_room('game board',
                              teams=game.teams, score=game.score_board)
+
+    def on_add_next(self, text):
+        next = Next(text=text)
+        db.session.add(Next(text=text))
+        db.session.commit()
+        self.publish_to_room('next list',
+                             [{'id': next.id, 'text': next.text} \
+                              for next in Next.query.all()])
+
+    def on_delete_next(self, id):
+        db.session.delete(Next.query.get(id))
+        db.session.commit()
+        self.publish_to_room('next list',
+                             [{'id': next.id, 'text': next.text} \
+                              for next in Next.query.all()])
+
+    def on_swype(self, team):
+        game = db.session.query(Game).filter(Game.ended != None).first()
+        if game is None:
+            return
+        game.swype(team)
+        self.publish_to_room('game board', teams=game.teams)
+
+    def on_toggle_pause(self):
+        game = db.session.query(Game).filter(Game.ended != None).first()
+        if game is None:
+            return
+        game.toggle_pause()
+        self.publish_to_room('pause state', state=game.paused)
+
+    def on_cancel(self):
+        game = db.session.query(Game).filter(Game.ended != None).first()
+        if game is None:
+            return
+        game.terminate()
+        self.publish_to_room('game terminated')
