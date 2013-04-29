@@ -4,6 +4,8 @@ from datetime import datetime
 
 from flask.ext.sqlalchemy import SQLAlchemy
 
+from .helpers import player_to_dict
+
 db = SQLAlchemy()
 
 
@@ -86,6 +88,16 @@ class Game(db.Model):
         db.session.add(member2)
         db.session.commit()
         # notify.
+
+    @property
+    def teams(self):
+        """Returns the team list for this game with every player position."""
+        teams = {'barca': {}, 'madrid': {}}
+        teams['barca'][self.barca1.position]   = player_to_dict(self.barca1)
+        teams['barca'][self.barca2.position]   = player_to_dict(self.barca2)
+        teams['madrid'][self.madrid1.position] = player_to_dict(self.madrid1)
+        teams['madrid'][self.madrid2.position] = player_to_dict(self.madrid2)
+        return teams
 
     def terminate(self):
         """Ends the game and notifies via broadcasts all the clients that a new
