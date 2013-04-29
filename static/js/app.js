@@ -66,28 +66,35 @@ var APP = {
             'data-action': 'removePlayer',
             'data-name': player.data().name
         });
+        var gameAvatar = $('<img>').attr({
+            'src': player.attr('src'),
+            'data-name': player.data().name
+        });
         var target = $('.team-banner .empty').eq(0);
         var pos = target.hasClass('barca') ? 0 : 2;
         pos = target.hasClass('defense') ? pos + 1 : pos + 2;
         switch (pos) {
             case 1:
-              APP.__game_config__.teams.barca.defense = player.data().id;
-              break;
+                APP.__game_config__.teams.barca.defense = player.data().id;
+                $('#game .player-3').html(gameAvatar);
+                break;
             case 2:
-              APP.__game_config__.teams.barca.forward = player.data().id;
-              break;
+                APP.__game_config__.teams.barca.forward = player.data().id;
+                $('#game .player-1').html(gameAvatar);
+                break;
             case 3:
-              APP.__game_config__.teams.madrid.defense = player.data().id;
-              break;
+                APP.__game_config__.teams.madrid.defense = player.data().id;
+                $('#game .player-2').html(gameAvatar);
+                break;
             case 4:
-              APP.__game_config__.teams.madrid.forward = player.data().id;
-              break;
+                APP.__game_config__.teams.madrid.forward = player.data().id;
+                $('#game .player-4').html(gameAvatar);
+                break;
         }
         target.html(gravatar);
         target.removeClass('empty');
     },
     removePlayer: function(picture) {
-        console.log(picture);
         picture.parent().addClass('empty');
         picture.remove();
     }
