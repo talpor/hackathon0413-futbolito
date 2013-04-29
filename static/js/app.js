@@ -53,11 +53,19 @@ var APP = {
         });
     },
     createGame: function() {
-        $.post(API.createGame, APP.__game_config__, function() {
-            console.log('A new game started!');
-        }).error(function(e) {
-            console.error('sorry :(');
-            console.error(e);
+        $.ajax({
+            type: 'POST',
+            url: API.createGame,
+            data: JSON.stringify(APP.__game_config__),
+            contentType: 'application/json; charset=utf-8',  // working with application/x-www-form-urlencoded; is awful.
+            dataType: 'json',
+            success: function() {
+                console.log('A new game started!');
+            },
+            error: function(e) {
+                console.error('sorry :(');
+                console.error(e);
+            }
         });
     },
     selectPlayer: function(player) {

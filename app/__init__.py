@@ -47,7 +47,7 @@ GAME_TYPES = (
 def create_game():
     """Creates a new game. Checks that there's no game currently active.
 
-    Expects a request with the following format::
+    Expects a json request with the following format::
         {
             'type': <integer>,
             'teams': {
@@ -68,7 +68,7 @@ def create_game():
             'success': False,
             'reason': 'Currently there\'s an active game'
         })
-    if not request.json['type']:
+    if not request.json.has_key('type'):
         return 'no game type', 400
     if request.json['type'] not in [gt[0] for gt in GAME_TYPES]:
         return 'invalid game type', 400
