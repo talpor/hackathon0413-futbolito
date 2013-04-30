@@ -16,10 +16,10 @@ class PubSubMixin(object):
         request = kwargs.get('request', None)
         self.ctx = None
         if request:
-            current_app = request._app
-            self.ctx = current_app.request_context(request.environ)
+            self.app = request._app
+            self.ctx = self.app.request_context(request.environ)
             self.ctx.push()
-            current_app.preprocess_request()
+            self.app.preprocess_request()
             del kwargs['request']
         super(PubSubMixin, self).__init__(*args, **kwargs)
 
@@ -49,7 +49,11 @@ class PubSubMixin(object):
 
     def disconnect(self, *args, **kwargs):
         if self.ctx:
-            self.ctx.pop()
+            try:
+                self.ctx.pop()
+            except (IndexError, AttributeError) as e:
+                self.app.logger.error('Error popping out context after '
+                                      'disconnect: %s' % e)
         super(PubSubMixin, self).disconnect(*args, **kwargs)
 
 
