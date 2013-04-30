@@ -75,7 +75,7 @@ class IONamespace(BaseNamespace, PubSubMixin):
         has arrived.
         """
         super(IONamespace, self).on_subscribe()
-        game = db.session.query(Game).filter(Game.ended != None).first()
+        game = db.session.query(Game).filter(Game.ended == None).first()
         if game is not None:
             self.publish_to_room('game board',
                                  time=datetime.utcnow() - game.created,
@@ -85,7 +85,7 @@ class IONamespace(BaseNamespace, PubSubMixin):
     # ------------------------
     def on_goal(self, team, position, own=False):
         """Updates the board according to the given action."""
-        game = db.session.query(Game).filter(Game.ended != None).first()
+        game = db.session.query(Game).filter(Game.ended == None).first()
         if game is None:
             return
         # check if they're terminating the game
@@ -94,10 +94,10 @@ class IONamespace(BaseNamespace, PubSubMixin):
         # update stuff
         player1 = getattr(game, '%s1' % team)
         player2 = getattr(game, '%s2' % team)
-        scorer = player1 if player1.position == position else player2
-        team   = team if not own \
-                      else [t for t in ['barca', 'madrid'] if t != team][0]
-        goal   = Goal(scorer, game, team)
+        scorer  = player1 if player1.position == position else player2
+        team    = team if not own \
+                       else [t for t in ['barca', 'madrid'] if t != team][0]
+        goal    = Goal(scorer, game, team)
         db.session.add(goal)
         db.commit()
         # update boards
@@ -105,7 +105,7 @@ class IONamespace(BaseNamespace, PubSubMixin):
                              teams=game.teams, score=game.score_board)
 
     def on_undo(self):
-        game = db.session.query(Game).filter(Game.ended != None).first()
+        game = db.session.query(Game).filter(Game.ended == None).first()
         if game is None:
             return
         # update stuff
@@ -133,21 +133,21 @@ class IONamespace(BaseNamespace, PubSubMixin):
                                       for next in Next.query.all()])
 
     def on_swype(self, team):
-        game = db.session.query(Game).filter(Game.ended != None).first()
+        game = db.session.query(Game).filter(Game.ended == None).first()
         if game is None:
             return
         game.swype(team)
         self.publish_to_room('game board', teams=game.teams)
 
     def on_toggle_pause(self):
-        game = db.session.query(Game).filter(Game.ended != None).first()
+        game = db.session.query(Game).filter(Game.ended == None).first()
         if game is None:
             return
         game.toggle_pause()
         self.publish_to_room('pause state', state=game.paused)
 
     def on_cancel(self):
-        game = db.session.query(Game).filter(Game.ended != None).first()
+        game = db.session.query(Game).filter(Game.ended == None).first()
         if game is None:
             return
         game.terminate()
