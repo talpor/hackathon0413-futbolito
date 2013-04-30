@@ -102,10 +102,11 @@ class Game(db.Model):
         if self.ended:
             return
         self.ended = datetime.utcnow()
-        # notify.
+        db.session.commit()
 
     def toggle_pause(self):
         self.paused = not self.paused
+        db.session.commit()
 
 
 class Goal(db.Model):
