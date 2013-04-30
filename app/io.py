@@ -77,9 +77,9 @@ class IONamespace(BaseNamespace, PubSubMixin):
         super(IONamespace, self).on_subscribe()
         game = db.session.query(Game).filter(Game.ended == None).first()
         if game is not None:
-            self.publish_to_room('game board',
-                                 time=datetime.utcnow() - game.created,
-                                 teams=game.teams, score=game.score_board)
+            self.emit('game board',
+                      dict(time=datetime.utcnow() - game.created,
+                           teams=game.teams, score=game.score_board))
 
     # From raspberrypi buttons
     # ------------------------
