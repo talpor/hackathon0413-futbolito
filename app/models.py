@@ -78,8 +78,8 @@ class Game(db.Model):
             }
         """
         return {
-            'barca': 0,
-            'madrid': 0
+            'barca': self.goals.filter(Goal.team == 'barca').count(),
+            'madrid': self.goals.filter(Goal.team == 'madrid').count()
         }
 
     def swype(self, team):
@@ -130,7 +130,7 @@ class Game(db.Model):
 
 class Goal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    time = db.Column(db.DateTime)  # seconds after game started
+    time = db.Column(db.Integer)  # seconds after game started
     team = db.Column(db.String(6))
     player_id = db.Column(db.Integer, db.ForeignKey('player.id'))
     game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
@@ -149,7 +149,7 @@ class Goal(db.Model):
         self.player = player
         self.game   = game
         self.team   = team
-        self.time   = datetime.utcnow() - self.game.created
+        self.time   = (datetime.utcnow() - self.game.created).seconds
         self.barca1_position  = game.barca1.position
         self.barca2_position  = game.barca1.position
         self.madrid1_position = game.madrid1.position
