@@ -128,8 +128,10 @@ def add_next():
 
 @app.route('/nexts/<int:next_id>', methods=['DELETE'])
 def delete_next(next_id):
-    db.session.delete(Next.query.get(next_id))
-    db.session.commit()
+    next = Next.query.get(id)
+    if next is not None:
+        db.session.delete(next)
+        db.session.commit()
     return jsonify({'success': True})
 
 @app.route('/players', methods=['GET'])

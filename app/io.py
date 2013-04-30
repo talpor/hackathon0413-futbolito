@@ -135,8 +135,10 @@ class IONamespace(PubSubMixin, BaseNamespace):
         if game is None:
             return
         # update stuff
-        db.session.delete(game.goals.query.order_by(Goal.time).first())
-        db.session.commit()
+        goal = game.goals.order_by(Goal.time.desc()).first()
+        if goal is not None:
+            db.session.delete(goal)
+            db.session.commit()
         # update boards
         self.publish_to_room('game board',
                              teams=game.teams, score=game.score_board)
@@ -152,8 +154,10 @@ class IONamespace(PubSubMixin, BaseNamespace):
                                       for next in Next.query.all()])
 
     def on_delete_next(self, id):
-        db.session.delete(Next.query.get(id))
-        db.session.commit()
+        next = Next.query.get(id)
+        if next is not None:
+            db.session.delete(next)
+            db.session.commit()
         self.publish_to_room('next list',
                              results=[{'id': next.id, 'text': next.text} \
                                       for next in Next.query.all()])
