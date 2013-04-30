@@ -80,12 +80,16 @@ class IONamespace(PubSubMixin, BaseNamespace):
         """Handles the redis connection to publish a message to our room
         channel.
         """
-        pkt = json.dumps({
+        msg = {
             'event_name': event_name,
             'args': kwargs
-        })
+        }
+        pkt = json.dumps(msg)
         r = redis.StrictRedis()
         r.publish('futbolito', pkt)
+        # also emit to myself
+        self.emit('log', msg)
+        self.emit(msg['event_name'], msg['args'])
 
     #
     # Event Listeners
