@@ -9,9 +9,20 @@ from .models import Game, Goal, Next, db
 
 
 class PubSubMixin(object):
-    """In charge of common redis PubSub initialization. defines the gevent listener
-    and the `on_subscribe` method.
+    """In charge of common redis PubSub initialization. defines the gevent
+    listener and the `on_subscribe` method.
     """
+    def __init__(self, *args, **kwargs):
+        request = kwargs.get('request', None)
+        self.ctx = None
+        if request:
+            current_app = request._app
+            self.ctx = current_app.request_context(request.environ)
+            self.ctx.push()
+            current_app.preprocess_request()
+            del kwargs['request']
+        super(PubSubMixin, self).__init__(*args, **kwargs)
+
     def listener(self):
         r = redis.StrictRedis()
         r = r.pubsub()
@@ -36,8 +47,13 @@ class PubSubMixin(object):
         """
         raise NotImplementedError
 
+    def disconnect(self, *args, **kwargs):
+        if self.ctx:
+            self.ctx.pop()
+        super(PubSubMixin, self).disconnect(*args, **kwargs)
 
-class IONamespace(BaseNamespace, PubSubMixin):
+
+class IONamespace(PubSubMixin, BaseNamespace):
     def subscribe_to_channels(self, r):
         """Makes the given redis connection `r` subscribe to a list of
         channels.

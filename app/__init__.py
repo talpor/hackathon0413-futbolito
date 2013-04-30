@@ -172,7 +172,9 @@ def socket_io(path):
         '/board': IONamespace,
     }
     try:
-        socketio_manage(request.environ, namespaces, request)
+        _real_request = request._get_current_object()
+        _real_request._app = app
+        socketio_manage(request.environ, namespaces, _real_request)
     except:
         app.logger.error("Exception while handling socketio connection",
                          exc_info=True)
