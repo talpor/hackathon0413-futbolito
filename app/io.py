@@ -115,6 +115,8 @@ class IONamespace(PubSubMixin, BaseNamespace):
         # check if they're terminating the game
         if game.score_board['barca'] == 5 or game.score_board['madrid'] == 5:
             game.terminate()
+            self.publish_to_room('game terminated')
+            return
         # update stuff
         player1 = getattr(game, '%s1' % team)
         player2 = getattr(game, '%s2' % team)
@@ -123,7 +125,7 @@ class IONamespace(PubSubMixin, BaseNamespace):
                        else [t for t in ['barca', 'madrid'] if t != team][0]
         goal    = Goal(scorer, game, team)
         db.session.add(goal)
-        db.commit()
+        db.session.commit()
         # update boards
         self.publish_to_room('game board',
                              teams=game.teams, score=game.score_board)
@@ -161,6 +163,10 @@ class IONamespace(PubSubMixin, BaseNamespace):
         if game is None:
             return
         game.swype(team)
+        self.publish_to_room('game board', teams=game.teams)
+
+    def on_board(self):
+        game = db.session.query(Game).filter(Game.ended == None).first()
         self.publish_to_room('game board', teams=game.teams)
 
     def on_toggle_pause(self):
