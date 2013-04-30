@@ -51,6 +51,21 @@ class Game(db.Model):
         super(Game,self).__init__(*args, **kwargs)
         self.created = created or datetime.utcnow()
 
+        # set positions
+        if self.barca1 is not None:
+            self.barca1.position = 'defense'
+        if self.barca2 is not None:
+            self.barca2.position = 'forward'
+        if self.madrid1 is not None:
+            self.madrid1.position = 'defense'
+        if self.madrid2 is not None:
+            self.madrid2.position = 'forward'
+        db.session.add(self.barca1)
+        db.session.add(self.barca2)
+        db.session.add(self.madrid1)
+        db.session.add(self.madrid2)
+        db.session.commit()
+
     def __repr__(self):
         return '<Game %s: %s>' % (self.id, self.created)
 
@@ -103,6 +118,10 @@ class Game(db.Model):
             return
         self.ended = datetime.utcnow()
         db.session.commit()
+
+    @property
+    def terminated(self):
+        return self.ended is not None
 
     def toggle_pause(self):
         self.paused = not self.paused
