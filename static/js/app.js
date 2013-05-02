@@ -27,7 +27,16 @@ var APP = {
 
         $(document).on('click', '#game .player', function() {
             console.log('GOOOOOLLLL!!');
-            window.io.emit('goal', {'team':'barca', 'position':'defender'});
+            var p = $(this);
+            if (p.hasClass('player-1'))
+                window.io.emit('goal', 'barca', 'defender');
+            else if (p.hasClass('player-2'))
+                window.io.emit('goal', 'madrid', 'forward');
+            else if (p.hasClass('player-3'))
+                window.io.emit('goal', 'barca', 'forward');
+            else if (p.hasClass('player-4'))
+                window.io.emit('goal', 'madrid', 'defender');
+            
         });
 
         $.getJSON(API.players, function(data) {
@@ -74,9 +83,21 @@ var APP = {
             console.log(data);
         });
 
-        window.io.on('undo', function(data) {
+        window.io.on('game board', function(data) {
+            $('.barca-side p').text(data.score.barca);
+            $('.madrid-side p').text(data.score.madrid);
+            $('.player-1 img').attr('src', 'http://www.gravatar.com/avatar/' +
+                                    CryptoJS.MD5(data.teams.barca.defense.email));
+            $('.player-3 img').attr('src', 'http://www.gravatar.com/avatar/' +
+                                    CryptoJS.MD5(data.teams.barca.forward.email));
+            $('.player-4 img').attr('src', 'http://www.gravatar.com/avatar/' +
+                                    CryptoJS.MD5(data.teams.madrid.defense.email));
+            $('.player-2 img').attr('src', 'http://www.gravatar.com/avatar/' +
+                                    CryptoJS.MD5(data.teams.madrid.forward.email));
             console.log(data);
         });
+
+        window.io.on()
     },
     selectPlayer: function(player) {
         var gravatar = $('<img>').attr({
@@ -94,19 +115,19 @@ var APP = {
         switch (pos) {
             case 1:
                 APP.__game_config__.teams.barca.defense = player.data().id;
-                $('#game .player-3').html(gameAvatar);
+                $('#game .player-1').html(gameAvatar);
                 break;
             case 2:
                 APP.__game_config__.teams.barca.forward = player.data().id;
-                $('#game .player-1').html(gameAvatar);
+                $('#game .player-3').html(gameAvatar);
                 break;
             case 3:
                 APP.__game_config__.teams.madrid.defense = player.data().id;
-                $('#game .player-2').html(gameAvatar);
+                $('#game .player-4').html(gameAvatar);
                 break;
             case 4:
                 APP.__game_config__.teams.madrid.forward = player.data().id;
-                $('#game .player-4').html(gameAvatar);
+                $('#game .player-2').html(gameAvatar);
                 break;
         }
         target.html(gravatar);
