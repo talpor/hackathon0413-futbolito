@@ -2,12 +2,14 @@ import os
 
 from app import app
 from gevent import monkey; monkey.patch_all()
+from socketio.server import SocketIOServer
+from werkzeug.serving import run_with_reloader
 
-if __name__ == '__main__':
+@run_with_reloader
+def server():
     port = int(os.environ.get('PORT', 5000))
-    if app.debug:
-        from werkzeug.debug import DebuggedApplication
-        app.wsgi_app = DebuggedApplication(app.wsgi_app, True)
-    from socketio.server import SocketIOServer
     SocketIOServer(('0.0.0.0', port), app, policy_server=False).serve_forever()
     # app.run(host='0.0.0.0', port=port)
+
+if __name__ == '__main__':
+    server()

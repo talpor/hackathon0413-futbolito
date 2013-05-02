@@ -12,7 +12,7 @@ from .models import db, Game, Next, Player
 # configuration
 # -----------------------------------------------------------------------------
 
-DEBUG = False
+DEBUG = True
 DATABASE_URL = 'postgresql://futbolito:ttaallppoorr@/futbolito'
 SECRET_KEY = 'A0Zr98j/3yXsdr R~XHXFG!jmN]ASSR/,?RT'
 SEND_FILE_MAX_AGE_DEFAULT = 0
@@ -158,10 +158,6 @@ def game_list():
             for game in Game.query.order_by(Game.created).all()
         ]
     })
-
-#
-# RaspberryPi API
-# -----------------------------------------------------------------------------
 
 #
 # SocketIO
