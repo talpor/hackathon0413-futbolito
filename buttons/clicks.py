@@ -1,7 +1,11 @@
+from __future__ import absolute_import
+
 import RPi.GPIO as GPIO
 import time
 
-#ad-hoc function to reset a pin. DRY
+from . import actions
+
+# ad-hoc function to reset a pin. DRY
 def reset_ioin(ioins, ioin, ioin_queues, erase_queues, blocked_queues, now):
     ioin_queues[ioin] = []
     #erase_queues['queues'][ioin][0] = 0
@@ -10,34 +14,30 @@ def reset_ioin(ioins, ioin, ioin_queues, erase_queues, blocked_queues, now):
     for ioin in ioins:
         blocked_queue[ioin] = now
 
-#Set up the IO pins that are available and wich are in use
-in1 = 11
-in2 = 13
-in3 = 15
-in4 = 16
-in5 = 18
-ioins = [in1,in2,in3,in4]
+# Set up the IO pins that are available and wich are in use
+ioins = actions.board_players.keys()
 count_ins = len(ioins)
 
-#A pin is always on a certain state (ON or OFF) and the pressing of a button flips this state.
-#Wheter a pin is always ON or OFF depends on the circuit.
-#This variable states if the pins are either ON or OFF when the button is not pressed.
+# A pin is always on a certain state (ON or OFF) and the pressing of a button
+# flips this state. Wether a pin is always ON or OFF depends on the circuit.
+# This variable states if the pins are either ON or OFF when the button is not
+# pressed.
 base_state = True
 
-#Set the numbering mode to use the pin numbers, and register the pins as INs
+# Set the numbering mode to use the pin numbers, and register the pins as INs
 GPIO.setmode(GPIO.BOARD)
 for ioin in ioins:
     GPIO.setup(ioin, GPIO.IN)
 
-#Time
+# Time
 now = time.time()
 
-#List with the previous states for each pin
+# List with the previous states for each pin
 prev_inputs = []
 for ioin in ioins:
     prev_inputs.append(GPIO.input(ioin))
 
-#Dictionary io->(time_flipped,sent) that will be our erase click queue
+# Dictionary io->(time_flipped,sent) that will be our erase click queue
 erase_queues = {'queues':{},'last_time':now}
 for ioin in ioins:
     erase_queues['queues'][ioin] = (0,False)
@@ -110,7 +110,7 @@ while True:
         #The condition is true if: a) The button has been pressed enough time, b) the erase hasn't been detected
         if (erase_queues['queues'][ioin][0] >= et) and (not erase_queues['queues'][ioin][1]):
             reset_ioin(ioins,ioin,ioin_queues,erase_queues,blocked_queue,now)
-            print "erase %s" % ioin
+            actions.undo(ioin)  # print "erase %s" % ioin
             continue
 
         if input != base_state:
@@ -131,16 +131,14 @@ while True:
             #If so, count a single click and block the button
             if now-ioin_queue[0] >= dt:
                 reset_ioin(ioins,ioin,ioin_queues,erase_queues,blocked_queue,now)
-                # goal
-                r.publish('futbolito', {})
-                # print "click %s" % ioin
+                actions.goal(ioin)  # print "click %s" % ioin
                 continue
 
             #The time for a double click has not expired
             #If the button was pressed, count a double click and block the button
             elif press:
                 reset_ioin(ioins,ioin,ioin_queues,erase_queues,blocked_queue,now)
-                print "double click %s" % ioin
+                actions.goal(ioin, own=True)  # print "double click %s" % ioin
                 continue
 
             #If we get here, it means that the time for a double click hasn't expired,
