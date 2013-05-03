@@ -1,6 +1,8 @@
 Flask==0.9
 Flask-SQLAlchemy==0.16
-gevent-socketio==0.3.5-rc2
+gunicorn==0.17.4
 psycopg2==2.5
 redis==2.7.2
 socketIO-client==0.4
+
+git+git://github.com/abourget/gevent-socketio.git@aeece7
