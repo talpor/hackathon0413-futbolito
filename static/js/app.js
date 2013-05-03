@@ -36,7 +36,7 @@ var APP = {
                 window.io.emit('goal', 'barca', 'forward');
             else if (p.hasClass('player-4'))
                 window.io.emit('goal', 'madrid', 'defender');
-            
+
         });
 
         $.getJSON(API.players, function(data) {
@@ -75,6 +75,7 @@ var APP = {
     },
     ioConnect: function () {
         window.io = io.connect('/board');
+        window.io.emit('subscribe');
 
         // debug io events
         window.io.on('log', function (pkt) { console.info('Receiving from server:', pkt); });
@@ -96,8 +97,6 @@ var APP = {
                                     CryptoJS.MD5(data.teams.madrid.forward.email));
             console.log(data);
         });
-
-        window.io.on()
     },
     selectPlayer: function(player) {
         var gravatar = $('<img>').attr({
