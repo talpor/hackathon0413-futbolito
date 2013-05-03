@@ -33,7 +33,8 @@ db.init_app(app)
 # -----------------------------------------------------------------------------
 @app.route('/')
 def home(room_id=None):
-    return render_template('index.html')
+    game = db.session.query(Game).filter(Game.ended == None).first()
+    return render_template('index.html', game=game)
 
 #
 # browser API
