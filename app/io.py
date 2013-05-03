@@ -35,6 +35,21 @@ class PubSubMixin(object):
     def on_subscribe(self, *args, **kwargs):
         self.spawn(self.listener)
 
+    def publish_to_room(self, event_name, **kwargs):
+        """Handles the redis connection to publish a message to our room
+        channel.
+        """
+        msg = {
+            'event_name': event_name,
+            'args': kwargs
+        }
+        pkt = json.dumps(msg)
+        r = redis.StrictRedis()
+        r.publish('futbolito', pkt)
+        # also emit to myself
+        self.emit('log', msg)
+        self.emit(msg['event_name'], msg['args'])
+
     def process_pubsub_msg(self, msg):
         """This method should take care of the given message and process it.
         It should be implemented by the subclasses.
@@ -71,25 +86,11 @@ class IONamespace(PubSubMixin, BaseNamespace):
         if msg['type'] != 'message':
             return
 
-        print msg
+        if self.app.debug:
+            self.app.logger.info(msg)
         msg = json.loads(msg['data'])
         if msg.has_key('event_name'):
             self.emit(msg['event_name'], msg['args'])
-
-    def publish_to_room(self, event_name, **kwargs):
-        """Handles the redis connection to publish a message to our room
-        channel.
-        """
-        msg = {
-            'event_name': event_name,
-            'args': kwargs
-        }
-        pkt = json.dumps(msg)
-        r = redis.StrictRedis()
-        r.publish('futbolito', pkt)
-        # also emit to myself
-        self.emit('log', msg)
-        self.emit(msg['event_name'], msg['args'])
 
     #
     # Event Listeners
@@ -102,7 +103,7 @@ class IONamespace(PubSubMixin, BaseNamespace):
         game = db.session.query(Game).filter(Game.ended == None).first()
         if game is not None:
             self.emit('game board',
-                      dict(time=datetime.utcnow() - game.created,
+                      dict(time=(datetime.utcnow() - game.created).seconds,
                            teams=game.teams, score=game.score_board))
 
     # From raspberrypi buttons
@@ -171,7 +172,9 @@ class IONamespace(PubSubMixin, BaseNamespace):
 
     def on_board(self):
         game = db.session.query(Game).filter(Game.ended == None).first()
-        self.publish_to_room('game board', teams=game.teams)
+        if game is None:
+            return
+        self.emit('game board', teams=game.teams)
 
     def on_toggle_pause(self):
         game = db.session.query(Game).filter(Game.ended == None).first()
