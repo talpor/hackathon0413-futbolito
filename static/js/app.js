@@ -26,7 +26,6 @@ var APP = {
         });
 
         $(document).on('click', '#game .player', function() {
-            console.log('GOOOOOLLLL!!');
             var p = $(this);
             if (p.hasClass('player-1'))
                 window.io.emit('goal', 'barca', 'defender');
@@ -37,6 +36,11 @@ var APP = {
             else if (p.hasClass('player-4'))
                 window.io.emit('goal', 'madrid', 'defender');
 
+        });
+
+        $('.swap').click(function (e) {
+            e.preventDefault();
+            window.io.emit('swype', $(this).data('team'));
         });
 
         $.getJSON(API.players, function(data) {
