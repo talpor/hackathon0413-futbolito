@@ -151,7 +151,7 @@ class Goal(db.Model):
         self.team   = team
         self.time   = (datetime.utcnow() - self.game.created).seconds
         self.barca1_position  = game.barca1.position
-        self.barca2_position  = game.barca1.position
+        self.barca2_position  = game.barca2.position
         self.madrid1_position = game.madrid1.position
         self.madrid2_position = game.madrid2.position
 
