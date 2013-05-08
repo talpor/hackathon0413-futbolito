@@ -3,10 +3,12 @@ from __future__ import absolute_import
 import os
 
 from flask import Flask, Response, jsonify, render_template, request
+from flask.ext.admin import Admin
+from flask.ext.admin.contrib.sqlamodel import ModelView
 
 from .helpers import player_to_dict
 from .io import IONamespace
-from .models import db, Game, Next, Player
+from .models import db, Game, Next, Player, Goal
 
 #
 # configuration
@@ -26,6 +28,15 @@ app = Flask(__name__,
 app.config.from_object(__name__)
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 db.init_app(app)
+
+
+#
+# admin
+# -----------------------------------------------------------------------------
+admin = Admin(app)
+admin.add_view(ModelView(Player, db.session))
+admin.add_view(ModelView(Game, db.session))
+admin.add_view(ModelView(Goal, db.session))
 
 
 #
