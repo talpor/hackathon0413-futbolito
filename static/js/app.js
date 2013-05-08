@@ -85,17 +85,23 @@ var APP = {
         });
 
         window.io.on('game board', function(data) {
-            $('.barca-side p').text(data.score.barca);
-            $('.madrid-side p').text(data.score.madrid);
-            $('.player-1 img').attr('src', 'http://www.gravatar.com/avatar/' +
-                                    CryptoJS.MD5(data.teams.barca.defense.email));
-            $('.player-3 img').attr('src', 'http://www.gravatar.com/avatar/' +
-                                    CryptoJS.MD5(data.teams.barca.forward.email));
-            $('.player-4 img').attr('src', 'http://www.gravatar.com/avatar/' +
-                                    CryptoJS.MD5(data.teams.madrid.defense.email));
-            $('.player-2 img').attr('src', 'http://www.gravatar.com/avatar/' +
-                                    CryptoJS.MD5(data.teams.madrid.forward.email));
-            console.log(data);
+            if (data.score) {
+                $('.barca-side p').text(data.score.barca);
+                $('.madrid-side p').text(data.score.madrid);
+            }
+            if (data.teams) {
+                $('.player-1 img').attr('src', 'http://www.gravatar.com/avatar/' +
+                                        CryptoJS.MD5(data.teams.barca.defense.email));
+                $('.player-3 img').attr('src', 'http://www.gravatar.com/avatar/' +
+                                        CryptoJS.MD5(data.teams.barca.forward.email));
+                $('.player-4 img').attr('src', 'http://www.gravatar.com/avatar/' +
+                                        CryptoJS.MD5(data.teams.madrid.defense.email));
+                $('.player-2 img').attr('src', 'http://www.gravatar.com/avatar/' +
+                                        CryptoJS.MD5(data.teams.madrid.forward.email));
+            }
+            if (data.time) {
+                // do something.
+            }
         });
     },
     selectPlayer: function(player) {
