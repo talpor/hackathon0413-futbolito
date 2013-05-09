@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import RPi.GPIO as GPIO
 import time
 
-from . import actions
+import actions
 
 # ad-hoc function to reset a pin. DRY
 def reset_ioin(ioins, ioin, ioin_queues, erase_queues, blocked_queues, now):
